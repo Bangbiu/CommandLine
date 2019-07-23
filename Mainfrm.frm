@@ -4,16 +4,24 @@ Begin VB.Form Mainfrm
    ClientHeight    =   4785
    ClientLeft      =   6000
    ClientTop       =   2010
-   ClientWidth     =   7470
+   ClientWidth     =   7455
+   Icon            =   "Mainfrm.frx":0000
    LinkTopic       =   "Form1"
    ScaleHeight     =   4785
-   ScaleWidth      =   7470
+   ScaleWidth      =   7455
+   Begin VB.FileListBox CurPathCom 
+      Height          =   2250
+      Left            =   7440
+      TabIndex        =   1
+      Top             =   0
+      Width           =   3375
+   End
    Begin VB.TextBox Console 
       Appearance      =   0  'Flat
       BackColor       =   &H00000000&
       BeginProperty Font 
          Name            =   "System"
-         Size            =   15
+         Size            =   12
          Charset         =   134
          Weight          =   700
          Underline       =   0   'False
@@ -26,7 +34,7 @@ Begin VB.Form Mainfrm
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
       TabIndex        =   0
-      Text            =   "Mainfrm.frx":0000
+      Text            =   "Mainfrm.frx":014A
       Top             =   0
       Width           =   7455
    End
@@ -37,10 +45,6 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-
-Public CurPath As String
-Public CurInput As String
-Public History As String
 
 Private Sub Console_Change()
         Dim Pref As Long
@@ -53,14 +57,17 @@ Private Sub Console_Change()
 End Sub
 
 Private Sub Console_KeyDown(KeyCode As Integer, Shift As Integer)
-        
+        If Console.SelStart < Len(History) + Len(CurPath) Then
+            ResetSel
+        End If
         If KeyCode = vbKeyBack Then
-            Reset
+        Reset
         ElseIf KeyCode = vbKeyReturn Then
-            History = Console.Text
+            History = Console.Text & CmdDealer.Deal()
             Console.Text = History & CurPath
             Console.SelStart = Len(History)
             History = History & vbCrLf
+        Else
         End If
 End Sub
 
@@ -72,7 +79,14 @@ Private Sub Reset(Optional Force As Boolean = False)
         End If
 End Sub
 
+Private Sub ResetSel()
+    Console.SelStart = Len(Console.Text)
+End Sub
+
 Private Sub Console_KeyUp(KeyCode As Integer, Shift As Integer)
+    If Console.SelStart < Len(History) & Len(CurPath) Then
+        ResetSel
+    End If
     If KeyCode = vbKeyBack Then
         Reset
     ElseIf KeyCode = vbKeyReturn Then
@@ -82,12 +96,13 @@ Private Sub Console_KeyUp(KeyCode As Integer, Shift As Integer)
 End Sub
 
 Private Sub Form_Load()
-    Helper.Show
-    CurPath = App.Path & "> "
-    Console.Text = CurPath
-    Console.SelStart = Len(CurPath)
+    'Helper.Show
+    History = CmdDealer.GetVersionDescription() & vbCrLf
+    Reset True
+    
 End Sub
 
 Private Sub Form_Resize()
     Console.Move 0, 0, ScaleWidth, ScaleHeight
+    CurPathCom.Move ScaleWidth
 End Sub

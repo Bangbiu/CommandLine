@@ -36,6 +36,6 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private Sub Tracker_Timer()
-    Display.Text = Mainfrm.CurInput
+    Display.Text = CurInput
     
 End Sub
